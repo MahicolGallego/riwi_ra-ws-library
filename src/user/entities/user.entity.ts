@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Entity()
 export class User {
@@ -20,7 +19,7 @@ export class User {
   email: string;
 
   @Column({ type: 'enum', enum: Roles, default: Roles.user })
-  role: string;
+  role: Roles;
 
   @Column({ type: 'varchar', unique: true, length: 30, nullable: false })
   api_key: string;

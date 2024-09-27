@@ -16,7 +16,7 @@ export class Permission {
 
   @PrimaryColumn({ nullable: false })
   @Column({ type: 'enum', enum: Roles })
-  role: string;
+  role: Roles;
 
   @Column({ type: 'boolean' })
   write: boolean;
