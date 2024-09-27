@@ -21,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
         port: Number(configService.get<number>('DB_PORT')),
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
-        entities: ['src/**/*.entity.ts'],
+        entities: [__dirname + '/**/*.entity{.ts, .js}'],
         logging: true,
         synchronize: true,
         ssl: {
