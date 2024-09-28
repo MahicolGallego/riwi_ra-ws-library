@@ -10,12 +10,10 @@ import {
 
 @Entity('permissions')
 export class Permission {
-  @PrimaryColumn({ nullable: false })
-  @Column({ type: 'varchar', length: 20, enum: Roles })
+  @PrimaryColumn({ type: 'varchar', length: 20 })
   entity: string;
 
-  @PrimaryColumn({ nullable: false })
-  @Column({ type: 'enum', enum: Roles })
+  @PrimaryColumn({ type: 'enum', enum: Roles })
   role: Roles;
 
   @Column({ type: 'boolean' })
