@@ -5,7 +5,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
   app.setGlobalPrefix('api/v1');
 
   // use pipe for data validation of request and data transform
@@ -31,6 +30,8 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('library/api/v1/docs', app, document);
+  SwaggerModule.setup('/library/api/v1/docs', app, document);
+
+  await app.listen(3000);
 }
 bootstrap();

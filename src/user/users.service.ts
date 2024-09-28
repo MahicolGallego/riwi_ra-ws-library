@@ -19,8 +19,11 @@ export class UsersService {
     try {
       // Generate a unique API key for the new user
       const apiKey = await this.generateUniqueApiKey();
-      createUserDto.api_key = apiKey; // Assign the generated API key to the DTO
-      const newUser = this.userRepository.create(createUserDto); // Create a new user instance
+      // Create a new user instance
+      const newUser = this.userRepository.create({
+        ...createUserDto,
+        api_key: apiKey,
+      });
       return await this.userRepository.save(newUser); // Save the new user to the database
     } catch (error) {
       // If an error occurs, throw a signature error using the custom ErrorManager

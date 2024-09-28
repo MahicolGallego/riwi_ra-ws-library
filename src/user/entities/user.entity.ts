@@ -28,7 +28,7 @@ export class User {
   role: Roles;
 
   @Expose()
-  @Column({ type: 'varchar', unique: true, length: 30, nullable: false })
+  @Column({ type: 'varchar', unique: true, length: 40, nullable: false })
   api_key: string;
 
   // Exclude properties from serialization. It will not be included in the response when converting the entity to JSON.
