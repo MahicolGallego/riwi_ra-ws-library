@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLibraryDto } from './dto/create-library.dto';
-import { UpdateLibraryDto } from './dto/update-library.dto';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
-export class LibraryService {
-  create(createLibraryDto: CreateLibraryDto) {
+export class BooksService {
+  create(createLibraryDto: CreateBookDto) {
     return 'This action adds a new library';
   }
 
@@ -16,7 +16,7 @@ export class LibraryService {
     return `This action returns a #${id} library`;
   }
 
-  update(id: number, updateLibraryDto: UpdateLibraryDto) {
+  update(id: number, updateLibraryDto: UpdateBookDto) {
     return `This action updates a #${id} library`;
   }
 

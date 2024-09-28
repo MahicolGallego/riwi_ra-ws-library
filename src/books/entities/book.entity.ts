@@ -1,7 +1,14 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity()
-export class Library {
+@Entity('books')
+export class Book {
   @PrimaryColumn({ type: 'varchar', nullable: false })
   isbn: string;
 
@@ -16,4 +23,13 @@ export class Library {
 
   @Column({ type: 'date', nullable: false })
   publish_date: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('permissions')
 export class Permission {
   @PrimaryColumn({ nullable: false })
   @Column({ type: 'varchar', length: 20, enum: Roles })
@@ -31,7 +31,7 @@ export class Permission {
   delete: boolean;
 
   @CreateDateColumn()
-  createdDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;

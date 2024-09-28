@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LibraryModule } from './library/library.module';
+import { BookModule } from './books/book.module';
 import { PermissionModule } from './permissions/permission.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -25,11 +25,11 @@ import { AuthModule } from './auth/auth.module';
         logging: true,
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false, //conexiones no ssl(solo desarrollo)
+          rejectUnauthorized: false, //non ssl connections(development only)
         },
       }),
     }),
-    LibraryModule,
+    BookModule,
     PermissionModule,
     UserModule,
     AuthModule,
