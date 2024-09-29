@@ -14,7 +14,6 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  // Method to create a new user
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       // Generate a unique API key for the new user
@@ -48,7 +47,7 @@ export class UsersService {
       apiKey = randomBytes(20).toString('hex');
       // Check if the generated API key already exists
       const user = await this.findByApiKey(apiKey);
-      userNotExist = !user; // Set the flag if the user does not exist
+      userNotExist = !user; // Set the flag if the user with the api key does not exist
     }
     return apiKey; // Return the unique API key
   }
