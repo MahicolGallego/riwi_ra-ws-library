@@ -13,6 +13,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
@@ -22,6 +23,7 @@ import { Book } from './entities/book.entity';
 import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 
 @ApiTags('books')
+@ApiBearerAuth()
 @UseGuards(ApiKeyGuard)
 @Controller('books')
 export class BooksController {

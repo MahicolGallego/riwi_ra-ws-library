@@ -28,6 +28,11 @@ async function bootstrap() {
     .setTitle('Library API')
     .setDescription('API for stock management of books to small libraries')
     .setVersion('1.0')
+    .addApiKey({
+      name: 'x-api-key',
+      type: 'apiKey',
+      in: 'header',
+    })
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/library/api/v1/docs', app, document);
