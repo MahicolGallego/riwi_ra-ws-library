@@ -6,22 +6,28 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Book } from './entities/book.entity';
+import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 
 @ApiTags('books')
+@ApiBearerAuth() // Swagger documentation, Indicates that all endpoints in this controller require an API key in the headers for authentication
+@UseGuards(ApiKeyGuard) // Applies API key authentication guard to all endpoints in this controller
 @Controller('books')
 export class BooksController {
+  //inject dependencies through the constructor
   constructor(private readonly booksService: BooksService) {}
 
   // Define a POST endpoint for create book

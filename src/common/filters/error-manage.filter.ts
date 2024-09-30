@@ -7,7 +7,7 @@ export class ErrorManager extends Error {
     message,
   }: {
     type: keyof typeof HttpStatus; // The type must be a key of the HttpStatus enum
-    message: 'string';
+    message: string;
   }) {
     // Calls the base Error constructor with a formatted message
     super(`${type} :: ${message}`);
