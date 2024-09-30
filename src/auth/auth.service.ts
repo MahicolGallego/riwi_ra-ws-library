@@ -10,6 +10,7 @@ export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
   async registerUser(createUserDto: CreateUserDto): Promise<User | void> {
+    console.log(this.usersService);
     // Call the create method from the UsersService to create a new user
     return await this.usersService.create(createUserDto);
   }
