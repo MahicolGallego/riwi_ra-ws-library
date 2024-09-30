@@ -6,6 +6,7 @@ import { Book } from './entities/book.entity';
 import { Repository } from 'typeorm';
 import { format } from '@formkit/tempo';
 import { ErrorManager } from 'src/common/filters/error-manage.filter';
+import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 
 // Mark the UsersService class as injectable, allowing it to be used in other classes
 @Injectable()
@@ -49,8 +50,40 @@ export class BooksService {
     return await this.booksRepository.findOne({ where: { isbn } });
   }
 
-  findAll() {
-    return `This action returns all library`;
+  async findAllLeakedBooks(params: FindLeakedBooksDto, page: number) {
+    try {
+      console.log('params', params);
+      // find all leaked books use the params provided
+      const [items, total] = await this.booksRepository.findAndCount({
+        where: { ...params },
+        skip: page ? (page - 1) * 5 : 0,
+        take: 5,
+      });
+      //
+
+      if (!items)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message:
+            'There are not books in the database with parameters provided',
+        });
+
+      // format books for response
+      const formattedItems = items.map((book) =>
+        this.formatBookForResponse(book),
+      );
+
+      return {
+        books: formattedItems, // format books for response
+        total, // total found books
+        page: page ? page : 1, // Corresponding page
+        last_page: Math.ceil(total / 5), // inform what is the last page
+      };
+    } catch (error) {
+      throw error instanceof Error
+        ? ErrorManager.createSignatureError(error.message)
+        : ErrorManager.createSignatureError('An unexpected error occurred');
+    }
   }
 
   findOne(id: number) {

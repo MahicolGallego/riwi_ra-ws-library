@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -17,12 +18,14 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Book } from './entities/book.entity';
 import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { AuthorizationGuard } from 'src/permissions/guards/authorization.guard';
 import { Rbca } from 'src/common/decorators/rbac.decorator';
+import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 
 @ApiTags('books')
 @ApiBearerAuth() // Swagger documentation, Indicates that all endpoints in this controller require an API key in the headers for authentication
@@ -75,8 +78,43 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  @ApiOperation({
+    summary: 'Get all books with the filter options provided',
+    description:
+      'Get all books with the filter options provided in the query params and Applying pagination. By author, genre, titulo, page',
+  })
+  @ApiQuery({
+    name: 'author',
+    required: false,
+    description: 'author of the book',
+  })
+  @ApiQuery({
+    name: 'genre',
+    required: false,
+    description: 'genre of the book',
+  })
+  @ApiQuery({
+    name: 'publish_date',
+    required: false,
+    description: 'publish date of the book',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'page for the books result list',
+  })
+  async findAllBooks(
+    @Query('author') author: string,
+    @Query('gender') gender: string,
+    @Query('publish_date') publish_date: Date,
+    @Query('page') page: number,
+  ) {
+    const findLeakedBooksDto: FindLeakedBooksDto = {
+      author,
+      gender,
+      publish_date,
+    };
+    return await this.booksService.findAllLeakedBooks(findLeakedBooksDto, page);
   }
 
   @Get(':id')
