@@ -12,25 +12,28 @@ import { ErrorManager } from 'src/common/filters/error-manage.filter';
 export class BooksService {
   //inject dependencies through the constructor
   constructor(
-    @InjectRepository(Book) private readonly booksService: Repository<Book>,
+    @InjectRepository(Book) private readonly booksRepository: Repository<Book>,
   ) {}
 
-  async create(createLibraryDto: CreateBookDto) {
+  async create(createBookDto: CreateBookDto) {
     try {
+      // Check if a book with the same ISBN already exists
+      const existingBook = await this.findOneByISBN(createBookDto.isbn);
+
+      if (existingBook) {
+        throw new ErrorManager({
+          type: 'CONFLICT',
+          message: 'El libro ya existe con ese ISBN.',
+        });
+      }
+
       // Create a new user instance
-      const newBook = this.booksService.create(createLibraryDto);
+      const newBook = this.booksRepository.create(createBookDto);
       // Save the new book to the database
-      const savedNewBook = await this.booksService.save(newBook);
+      const savedNewBook = await this.booksRepository.save(newBook);
 
       // Book with publish_date in 'dd-MMM-yyyy' format
-      const bookForResponse = {
-        isbn: savedNewBook.isbn,
-        author: savedNewBook.author,
-        title: savedNewBook.title,
-        gender: savedNewBook.gender,
-        // Convert the publish_date to 'dd-MMM-yyyy' format using the format function from @formkit/tempo
-        publish_date: format(savedNewBook.publish_date, 'short'),
-      };
+      const bookForResponse = this.formatBookForResponse(savedNewBook);
 
       return bookForResponse;
     } catch (error) {
@@ -40,6 +43,10 @@ export class BooksService {
       }
       throw ErrorManager.createSignatureError('an unexpected error occurred');
     }
+  }
+
+  async findOneByISBN(isbn: string): Promise<Book> {
+    return await this.booksRepository.findOne({ where: { isbn } });
   }
 
   findAll() {
@@ -56,5 +63,15 @@ export class BooksService {
 
   remove(id: number) {
     return `This action removes a #${id} library`;
+  }
+
+  formatBookForResponse(savedBook: Book) {
+    return {
+      isbn: savedBook.isbn,
+      author: savedBook.author,
+      title: savedBook.title,
+      gender: savedBook.gender,
+      publish_date: format(savedBook.publish_date, 'short'),
+    };
   }
 }

@@ -9,7 +9,6 @@ export class ApiKeyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
-      console.log('findByApiKey', this.usersService);
       // Get the request object from the current execution context
       const request = context.switchToHttp().getRequest();
       // Extract the user api key from the request headers
@@ -33,6 +32,9 @@ export class ApiKeyGuard implements CanActivate {
           message: 'Invalid user api key',
         });
       }
+
+      // Set the found user in the request for further processing in other components
+      request.user = foundUser;
 
       return true;
     } catch (error) {
