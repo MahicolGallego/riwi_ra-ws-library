@@ -21,6 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { Book } from './entities/book.entity';
 import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
+import { AuthorizationGuard } from 'src/permissions/guards/authorization.guard';
+import { Rbca } from 'src/common/decorators/rbac.decorator';
 
 @ApiTags('books')
 @ApiBearerAuth() // Swagger documentation, Indicates that all endpoints in this controller require an API key in the headers for authentication
@@ -31,6 +33,9 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   // Define a POST endpoint for create book
+  // Apply RBAC AUTHORIZATION
+  @Rbca(['admin'], 'write', 'books')
+  @UseGuards(AuthorizationGuard)
   @Post()
   // Endpoint documentation with swagger
   @ApiOperation({

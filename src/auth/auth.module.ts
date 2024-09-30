@@ -8,6 +8,6 @@ import { ApiKeyGuard } from './guards/api-key.guard';
   imports: [UserModule], // Include UserModule to allow access to user-related services
   controllers: [AuthController],
   providers: [AuthService, ApiKeyGuard],
-  exports: [ApiKeyGuard],
+  exports: [ApiKeyGuard], // Export ApiKeyGuard for use in other modules that import this module
 })
 export class AuthModule {}
