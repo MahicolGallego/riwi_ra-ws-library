@@ -3,7 +3,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
-import { Repository } from 'typeorm';
+import { Column, Repository, UpdateResult } from 'typeorm';
 import { format } from '@formkit/tempo';
 import { ErrorManager } from 'src/common/filters/error-manage.filter';
 import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
@@ -113,8 +113,32 @@ export class BooksService {
     }
   }
 
-  update(id: number, updateLibraryDto: UpdateBookDto) {
-    return `This action updates a #${id} library`;
+  async update(isbn: string, updateBookDto: UpdateBookDto): Promise<object> {
+    {
+      try {
+        // Query with deleteAt = null to avoid responses with soft deletes
+        const results = await this.booksRepository.update(
+          { isbn, deletedAt: null },
+          updateBookDto,
+        );
+
+        if (results.affected === 0) {
+          throw new ErrorManager({
+            type: 'NOT_FOUND',
+            message: 'Book not found with the provided ISBN.',
+          });
+        }
+
+        return {
+          success: 'true',
+          message: 'Book updated successfully.',
+        };
+      } catch (error) {
+        throw error instanceof Error
+          ? ErrorManager.createSignatureError(error.message)
+          : ErrorManager.createSignatureError('An unexpected error occurred');
+      }
+    }
   }
 
   async remove(isbn: string): Promise<object | void> {
