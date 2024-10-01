@@ -117,8 +117,30 @@ export class BooksService {
     return `This action updates a #${id} library`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} library`;
+  async remove(isbn: string): Promise<object | void> {
+    try {
+      // Find the book cause soft delete requires an instance of the class
+      const book = await this.booksRepository.findOne({ where: { isbn } });
+
+      if (!book) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Book not found with the provided ISBN.',
+        });
+      }
+
+      // Soft delete: set the 'deletedAt' flag, logical delete
+      await this.booksRepository.softRemove(book);
+
+      return {
+        success: 'true',
+        message: 'Book marked as deleted successfully.',
+      };
+    } catch (error) {
+      throw error instanceof Error
+        ? ErrorManager.createSignatureError(error.message)
+        : ErrorManager.createSignatureError('An unexpected error occurred');
+    }
   }
 
   formatBookForResponse(savedBook: Book) {

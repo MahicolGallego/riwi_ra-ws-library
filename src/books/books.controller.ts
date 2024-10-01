@@ -219,8 +219,38 @@ export class BooksController {
     return this.booksService.update(+id, updateBookDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
+  @Rbca(['admin'], 'delete', 'books')
+  @UseGuards(AuthorizationGuard)
+  @Delete(':isbn')
+  @ApiOperation({
+    summary: 'Delete a book by ISBN',
+    description:
+      'Logical deletes a book using its ISBN. Marks the book as deleted without removing it from the database.',
+  })
+  @ApiParam({
+    name: 'isbn',
+    required: true,
+    description: 'The ISBN of the book to delete.',
+    type: String,
+  })
+  @ApiOkResponse({
+    description: 'Book marked as deleted successfully.',
+    schema: {
+      example: {
+        success: 'true',
+        message: 'Book marked as deleted successfully.',
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Book not found with the provided ISBN.',
+    schema: {
+      example: {
+        message: 'Book not found with the provided ISBN.',
+      },
+    },
+  })
+  remove(@Param('isbn') isbn: string) {
+    return this.booksService.remove(isbn);
   }
 }
