@@ -27,7 +27,7 @@ import {
 import { Book } from './entities/book.entity';
 import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { AuthorizationGuard } from 'src/permissions/guards/authorization.guard';
-import { Rbca } from 'src/common/decorators/rbac.decorator';
+import { Rbac } from 'src/common/decorators/rbac.decorator';
 import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 
 @ApiTags('books')
@@ -40,7 +40,7 @@ export class BooksController {
 
   // Define a POST endpoint for create book
   // Apply RBAC AUTHORIZATION
-  @Rbca(['admin'], 'write', 'books')
+  @Rbac(['admin'], 'write', 'books')
   @UseGuards(AuthorizationGuard)
   @Post()
   // Endpoint documentation with swagger
@@ -80,7 +80,7 @@ export class BooksController {
     return await this.booksService.create(createBookDto);
   }
 
-  @Rbca(['admin', 'user'], 'read', 'books')
+  @Rbac(['admin', 'user'], 'read', 'books')
   @UseGuards(AuthorizationGuard)
   @Get()
   @ApiOperation({
@@ -176,7 +176,7 @@ export class BooksController {
     return await this.booksService.findAllLeakedBooks(findLeakedBooksDto, page);
   }
 
-  @Rbca(['admin', 'user'], 'read', 'books')
+  @Rbac(['admin', 'user'], 'read', 'books')
   @UseGuards(AuthorizationGuard)
   @Get(':sbn')
   @ApiOperation({
@@ -214,7 +214,7 @@ export class BooksController {
     return this.booksService.findOne(isbn);
   }
 
-  @Rbca(['admin'], 'update', 'books')
+  @Rbac(['admin'], 'update', 'books')
   @UseGuards(AuthorizationGuard)
   @Patch(':isbn')
   @ApiOperation({
@@ -249,7 +249,7 @@ export class BooksController {
     return this.booksService.update(isbn, updateBookDto);
   }
 
-  @Rbca(['admin'], 'delete', 'books')
+  @Rbac(['admin'], 'delete', 'books')
   @UseGuards(AuthorizationGuard)
   @Delete(':isbn')
   @ApiOperation({
