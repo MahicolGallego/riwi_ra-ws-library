@@ -214,9 +214,39 @@ export class BooksController {
     return this.booksService.findOne(isbn);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  @Rbca(['admin'], 'update', 'books')
+  @UseGuards(AuthorizationGuard)
+  @Patch(':isbn')
+  @ApiOperation({
+    summary: 'update a book by ISBN',
+    description:
+      'update book data using its ISBN. Throws an error if not found.',
+  })
+  @ApiParam({
+    name: 'isbn',
+    required: true,
+    description: 'The ISBN of the book to update.',
+    type: String,
+  })
+  @ApiOkResponse({
+    description: 'Book updated successfully.',
+    schema: {
+      example: {
+        success: 'true',
+        message: 'Book updated successfully.',
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'book not found with the provided isbn',
+    schema: {
+      example: {
+        message: 'Book not found with the provided isbn.',
+      },
+    },
+  })
+  update(@Param('isbn') isbn: string, @Body() updateBookDto: UpdateBookDto) {
+    return this.booksService.update(isbn, updateBookDto);
   }
 
   @Rbca(['admin'], 'delete', 'books')
