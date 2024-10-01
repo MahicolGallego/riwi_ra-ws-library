@@ -16,8 +16,10 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -174,9 +176,42 @@ export class BooksController {
     return await this.booksService.findAllLeakedBooks(findLeakedBooksDto, page);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.booksService.findOne(+id);
+  @Rbca(['admin', 'user'], 'read', 'books')
+  @UseGuards(AuthorizationGuard)
+  @Get(':sbn')
+  @ApiOperation({
+    summary: 'Get a book by ISBN',
+    description:
+      'Retrieve a single book using its ISBN. Throws an error if not found.',
+  })
+  @ApiParam({
+    name: 'isbn',
+    required: true,
+    description: 'The ISBN of the book to retrieve.',
+    type: String,
+  })
+  @ApiOkResponse({
+    description: 'The book found successfully.',
+    schema: {
+      example: {
+        isbn: '978-3-16-148410-0',
+        title: 'Example Book Title',
+        author: 'Author Name',
+        genre: 'Genre Name',
+        publish_date: '2023-01-01',
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Book not found with the provided ISBN.',
+    schema: {
+      example: {
+        message: 'Book not found with the provided ISBN.',
+      },
+    },
+  })
+  findOne(@Param('isbn') isbn: string) {
+    return this.booksService.findOne(isbn);
   }
 
   @Patch(':id')

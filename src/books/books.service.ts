@@ -96,8 +96,21 @@ export class BooksService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} library`;
+  async findOne(isbn: string): Promise<Book> {
+    try {
+      const book = await this.booksRepository.findOne({ where: { isbn } });
+      if (!book) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Book not found with the provided ISBN.',
+        });
+      }
+      return book;
+    } catch (error) {
+      throw error instanceof Error
+        ? ErrorManager.createSignatureError(error.message)
+        : ErrorManager.createSignatureError('An unexpected error occurred');
+    }
   }
 
   update(id: number, updateLibraryDto: UpdateBookDto) {
