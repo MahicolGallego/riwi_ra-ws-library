@@ -5,7 +5,7 @@ import { Roles } from '../constants/roles.enum';
 type rolesKeys = keyof typeof Roles;
 type resourcesActionsKeys = keyof typeof ResourcesActions;
 
-export const Rbca = (
+export const Rbac = (
   roles: rolesKeys[],
   action: resourcesActionsKeys,
   entity: string,
