@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -68,6 +68,16 @@ export class BooksService {
             'There are not books in the database with parameters provided',
         });
 
+      const last_page = Math.ceil(total / 5);
+
+      // if requested page > last page ERROR with summary for inform to the client
+      if (page > last_page) {
+        throw new BadRequestException({
+          type: 'BAD_REQUEST',
+          message: `Requested page ${page} is out of range. Total books: ${total}. Last page: ${last_page}. Select a page in range of results.`,
+        });
+      }
+
       // format books for response
       const formattedItems = items.map((book) =>
         this.formatBookForResponse(book),
@@ -77,7 +87,7 @@ export class BooksService {
         books: formattedItems, // format books for response
         total, // total found books
         page: page ? page : 1, // Corresponding page
-        last_page: Math.ceil(total / 5), // inform what is the last page
+        last_page, // inform what is the last page
       };
     } catch (error) {
       throw error instanceof Error
@@ -103,7 +113,7 @@ export class BooksService {
       isbn: savedBook.isbn,
       author: savedBook.author,
       title: savedBook.title,
-      gender: savedBook.gender,
+      genre: savedBook.genre,
       publish_date: format(savedBook.publish_date, 'short'),
     };
   }

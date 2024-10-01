@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsInt, IsOptional, IsPositive } from 'class-validator';
+import { IsDate, IsOptional } from 'class-validator';
 
 export class FindLeakedBooksDto {
   // Define properties for the search process for all filtered books process for swagger documentation with @ApiProperty decorator
@@ -10,7 +10,7 @@ export class FindLeakedBooksDto {
 
   @ApiProperty({ type: 'string' })
   @IsOptional()
-  gender?: string;
+  genre?: string;
 
   @ApiProperty({ type: 'date' })
   @IsDate()

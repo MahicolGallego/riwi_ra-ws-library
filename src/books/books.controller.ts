@@ -19,6 +19,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Book } from './entities/book.entity';
@@ -77,41 +78,97 @@ export class BooksController {
     return await this.booksService.create(createBookDto);
   }
 
+  @Rbca(['admin', 'user'], 'read', 'books')
+  @UseGuards(AuthorizationGuard)
   @Get()
   @ApiOperation({
-    summary: 'Get all books with the filter options provided',
+    summary: 'Get all books with filter options',
     description:
-      'Get all books with the filter options provided in the query params and Applying pagination. By author, genre, titulo, page',
+      'Retrieve all books filtered by author, genre, and publish date, with pagination support',
   })
   @ApiQuery({
     name: 'author',
     required: false,
-    description: 'author of the book',
+    description: 'Filter books by author name.',
+    type: String,
   })
   @ApiQuery({
     name: 'genre',
     required: false,
-    description: 'genre of the book',
+    description: 'Filter books by genre.',
+    type: String,
   })
   @ApiQuery({
     name: 'publish_date',
     required: false,
-    description: 'publish date of the book',
+    description: 'Filter books by publication date. format YYYY-MM-DD',
+    type: String,
   })
   @ApiQuery({
     name: 'page',
     required: false,
-    description: 'page for the books result list',
+    description: 'Page number for pagination (default is 1).',
+    type: Number,
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'A list of books matching the provided filters.',
+    schema: {
+      example: {
+        books: [
+          {
+            id: 1,
+            title: 'Example Book Title',
+            author: 'Author Name',
+            genre: 'Genre Name',
+            publish_date: '2023-01-01',
+          },
+          // ... more book examples
+        ],
+        total: 10,
+        page: 1,
+        last_page: 2,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Requested page number is out of range.',
+    schema: {
+      example: {
+        message:
+          'Requested page 3 is out of range. Total books: 10. Last page: 2. Select a page in range of results.',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No books found matching the provided filters.',
+    schema: {
+      example: {
+        message: 'There are no books in the database with parameters provided',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'An unexpected error occurred.',
+    schema: {
+      example: {
+        message: 'An unexpected error occurred',
+      },
+    },
   })
   async findAllBooks(
     @Query('author') author: string,
-    @Query('gender') gender: string,
+    @Query('genre') genre: string,
     @Query('publish_date') publish_date: Date,
     @Query('page') page: number,
   ) {
     const findLeakedBooksDto: FindLeakedBooksDto = {
       author,
-      gender,
+      genre,
       publish_date,
     };
     return await this.booksService.findAllLeakedBooks(findLeakedBooksDto, page);
