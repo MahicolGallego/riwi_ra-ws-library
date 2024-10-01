@@ -30,7 +30,7 @@ export class Book {
   @ApiProperty()
   @Expose()
   @Column({ type: 'varchar', nullable: false })
-  gender: string;
+  genre: string;
 
   @ApiProperty()
   @Expose()
