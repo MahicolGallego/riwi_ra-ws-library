@@ -54,6 +54,12 @@ import { ServerResponse, IncomingMessage } from 'http';
             correlation_id: req[correlation_id_header],
           };
         },
+        autoLogging: false, // eliminar logs automaticos, solo ver los que se declaran
+        serializers: {
+          // No devuelva la info de req y res en los log
+          req: () => undefined,
+          res: () => undefined,
+        },
       },
     }),
     // Import other modules for the application

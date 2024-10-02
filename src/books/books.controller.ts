@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -29,6 +30,7 @@ import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { AuthorizationGuard } from 'src/permissions/guards/authorization.guard';
 import { Rbac } from 'src/common/decorators/rbac.decorator';
 import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
+import { Logger } from 'nestjs-pino';
 
 @ApiTags('books')
 @ApiBearerAuth() // Swagger documentation, Indicates that all endpoints in this controller require an API key in the headers for authentication
@@ -36,7 +38,10 @@ import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 @Controller('books')
 export class BooksController {
   //inject dependencies through the constructor
-  constructor(private readonly booksService: BooksService) {}
+  constructor(
+    private readonly booksService: BooksService,
+    private readonly logger: Logger,
+  ) {}
 
   // Define a POST endpoint for create book
   // Apply RBAC AUTHORIZATION
@@ -210,8 +215,12 @@ export class BooksController {
       },
     },
   })
-  findOne(@Param('isbn') isbn: string) {
-    return this.booksService.findOne(isbn);
+  findOne(@Param('isbn') isbn: string, @Req() req: Request) {
+    const requestCorrelationId = req['x-correlation-id'] || 'N/A';
+    this.logger.log('Search for a book with its isbn from controller', {
+      correlation_id: requestCorrelationId,
+    });
+    return this.booksService.findOne(isbn, requestCorrelationId);
   }
 
   @Rbac(['admin'], 'update', 'books')

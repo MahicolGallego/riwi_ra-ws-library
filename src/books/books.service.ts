@@ -55,7 +55,6 @@ export class BooksService {
 
   async findAllLeakedBooks(params: FindLeakedBooksDto, page: number) {
     try {
-      console.log('params', params);
       // find all leaked books use the params provided
       const [items, total] = await this.booksRepository.findAndCount({
         where: { ...params },
@@ -99,9 +98,11 @@ export class BooksService {
     }
   }
 
-  async findOne(isbn: string): Promise<Book> {
+  async findOne(isbn: string, requestCorrelationId: string): Promise<Book> {
     try {
-      this.logger.log('Search for a book with its isbn');
+      this.logger.log('Search for a book with its isbn', {
+        correlation_id: requestCorrelationId,
+      });
       const book = await this.booksRepository.findOne({ where: { isbn } });
       if (!book) {
         throw new ErrorManager({
@@ -109,7 +110,7 @@ export class BooksService {
           message: 'Book not found with the provided ISBN.',
         });
       }
-      this.logger.log('finalized, book by its isbn found');
+      // this.logger.log('finalized, book by its isbn found');
       return book;
     } catch (error) {
       throw error instanceof Error

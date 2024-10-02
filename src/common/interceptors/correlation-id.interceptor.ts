@@ -16,8 +16,6 @@ export class CorrelationIdInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
-    console.log('hola, estoy insertando el correlation id');
-
     // identificador unico para la request
     const id = randomUUID();
 
