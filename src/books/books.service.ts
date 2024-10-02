@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
-import { Column, Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { format } from '@formkit/tempo';
 import { ErrorManager } from 'src/common/filters/error-manage.filter';
 import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
@@ -11,6 +11,9 @@ import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 // Mark the UsersService class as injectable, allowing it to be used in other classes
 @Injectable()
 export class BooksService {
+  // propiedad logger para la traza de logs
+  private readonly logger = new Logger();
+
   //inject dependencies through the constructor
   constructor(
     @InjectRepository(Book) private readonly booksRepository: Repository<Book>,
@@ -98,6 +101,7 @@ export class BooksService {
 
   async findOne(isbn: string): Promise<Book> {
     try {
+      this.logger.log('Search for a book with its isbn');
       const book = await this.booksRepository.findOne({ where: { isbn } });
       if (!book) {
         throw new ErrorManager({
@@ -105,6 +109,7 @@ export class BooksService {
           message: 'Book not found with the provided ISBN.',
         });
       }
+      this.logger.log('finalized, book by its isbn found');
       return book;
     } catch (error) {
       throw error instanceof Error

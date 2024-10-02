@@ -2,9 +2,19 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
+import { CorrelationIdInterceptor } from './common/interceptors/correlation-id.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // implementar el interceptor para configurar header de correration id en todas las solicitudes
+  // para seguimiento de logs
+  app.useGlobalInterceptors(new CorrelationIdInterceptor());
+
+  // implements pino logger for logging requests and responses in console
+  app.useLogger(app.get(Logger));
+
   app.setGlobalPrefix('api/v1');
 
   // use pipe for data validation of request and data transform
