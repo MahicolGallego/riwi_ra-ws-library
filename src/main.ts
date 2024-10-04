@@ -2,9 +2,14 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // implements pino logger for logging requests and responses in console
+  app.useLogger(app.get(Logger));
+
   app.setGlobalPrefix('api/v1');
 
   // use pipe for data validation of request and data transform

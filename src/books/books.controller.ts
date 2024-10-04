@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -29,6 +30,7 @@ import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 import { AuthorizationGuard } from 'src/permissions/guards/authorization.guard';
 import { Rbac } from 'src/common/decorators/rbac.decorator';
 import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
+import { InjectPinoLogger, Logger, PinoLogger } from 'nestjs-pino';
 
 @ApiTags('books')
 @ApiBearerAuth() // Swagger documentation, Indicates that all endpoints in this controller require an API key in the headers for authentication
@@ -36,7 +38,11 @@ import { FindLeakedBooksDto } from './dto/find-leaked-books.dto';
 @Controller('books')
 export class BooksController {
   //inject dependencies through the constructor
-  constructor(private readonly booksService: BooksService) {}
+  constructor(
+    private readonly booksService: BooksService,
+    @InjectPinoLogger(BooksController.name) private readonly logger: PinoLogger,
+    // Se especifica el name de la clase para registrar tambien el contexto desde donde llega el log
+  ) {}
 
   // Define a POST endpoint for create book
   // Apply RBAC AUTHORIZATION
@@ -77,7 +83,12 @@ export class BooksController {
     },
   })
   async create(@Body() createBookDto: CreateBookDto) {
-    return await this.booksService.create(createBookDto);
+    this.logger.info(
+      `Creating a new book with data: ${JSON.stringify(createBookDto)}`,
+    );
+    const book = await this.booksService.create(createBookDto);
+    this.logger.info(`Book created successfully: ${book.isbn}`);
+    return book;
   }
 
   @Rbac(['admin', 'user'], 'read', 'books')
@@ -173,7 +184,17 @@ export class BooksController {
       genre,
       publish_date,
     };
-    return await this.booksService.findAllLeakedBooks(findLeakedBooksDto, page);
+    this.logger.info(
+      `Fetching books with filters: author=${author}, genre=${genre}, publish_date=${publish_date}, page=${page}`,
+    );
+
+    const books = await this.booksService.findAllLeakedBooks(
+      findLeakedBooksDto,
+      page,
+    );
+    this.logger.info(`Fetched ${books} from the database`);
+
+    return books;
   }
 
   @Rbac(['admin', 'user'], 'read', 'books')
@@ -210,8 +231,11 @@ export class BooksController {
       },
     },
   })
-  findOne(@Param('isbn') isbn: string) {
-    return this.booksService.findOne(isbn);
+  async findOne(@Param('isbn') isbn: string) {
+    this.logger.info(`Fetching book with ISBN: ${isbn}`);
+    const book = await this.booksService.findOne(isbn);
+    this.logger.info(`Book with ISBN ${isbn} found`, book);
+    return book;
   }
 
   @Rbac(['admin'], 'update', 'books')
@@ -245,8 +269,19 @@ export class BooksController {
       },
     },
   })
-  update(@Param('isbn') isbn: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(isbn, updateBookDto);
+  async update(
+    @Param('isbn') isbn: string,
+    @Body() updateBookDto: UpdateBookDto,
+  ) {
+    this.logger.info(
+      `Updating book with ISBN: ${isbn}, data: ${JSON.stringify(updateBookDto)}`,
+    );
+
+    const results = await this.booksService.update(isbn, updateBookDto);
+
+    this.logger.info(`Book with ISBN ${isbn} updated successfully`);
+
+    return results;
   }
 
   @Rbac(['admin'], 'delete', 'books')
@@ -280,7 +315,13 @@ export class BooksController {
       },
     },
   })
-  remove(@Param('isbn') isbn: string) {
-    return this.booksService.remove(isbn);
+  async remove(@Param('isbn') isbn: string) {
+    this.logger.info(`Deleting book with ISBN: ${isbn}`);
+
+    const results = this.booksService.remove(isbn);
+
+    this.logger.info(`Book with ISBN ${isbn} marked as deleted`);
+
+    return;
   }
 }
