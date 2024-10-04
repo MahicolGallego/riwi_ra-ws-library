@@ -34,7 +34,10 @@
     "mysql2": "^3.11.3",
     "nestjs-pino": "^4.1.0",
     "pg": "^8.13.0",
+    "pino": "^9.4.0",
     "pino-http": "^10.3.0",
+    "pino-multi-stream": "^6.0.0",
+    "pino-rotating-file-stream": "^0.0.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20"

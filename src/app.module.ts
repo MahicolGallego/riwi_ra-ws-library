@@ -6,8 +6,14 @@ import { PermissionModule } from './permissions/permission.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
-import { correlation_id_header } from './common/interceptors/correlation-id.interceptor';
-import { ServerResponse, IncomingMessage } from 'http';
+import { randomUUID } from 'crypto';
+
+function isDevelopmentEnv() {
+  return (
+    (process.env.NODE_ENV || 'development').trim().toLowerCase() ===
+    'development'
+  );
+}
 
 @Module({
   imports: [
@@ -38,27 +44,56 @@ import { ServerResponse, IncomingMessage } from 'http';
       pinoHttp: {
         // configuraciones para la capa de transporte
         // ->  actua en cómo se procesan o formatean los logs antes de ser entregados o visualizados
-        transport: {
-          target: 'pino-pretty', // define el formateador a usar para los logs
-          options: {
-            messageKey: 'message', // garantiza que el formateador(pino-pretty) use la clave message en vez del msg por
-            // defecto cuando fomatea los logs, mas legible/amigable
-          },
-        },
+
+        transport: isDevelopmentEnv()
+          ? {
+              targets: [
+                {
+                  target: 'pino-pretty', // define el formateador a usar para los logs
+                  options: {
+                    messageKey: 'message', // garantiza que el formateador(pino-pretty) use la clave message en vez del msg por
+                    // defecto cuando fomatea los logs, mas legible/amigable
+                    translateTime: 'yyyy-mm-dd, h:MM:ss TT',
+                    ignore: 'pid,hostname', // Ignorar información
+                  },
+                },
+                {
+                  target: 'pino-rotating-file-stream',
+                  options: {
+                    filename: `app-${new Date().getFullYear()}-month-${new Date().getMonth() + 1}.log`, // Required
+                    path: './logs', // Required
+                    size: '10M',
+                    maxSize: '1G',
+                    interval: '1d',
+                    maxFiles: 36,
+                  },
+                },
+              ],
+            }
+          : undefined,
         messageKey: 'message', // le pasa al transport el log utilizando la clave message, en vez del msg por
         // defecto, este es mas legible y comun
-
-        // Para que incluya el correlation id de la request al final de todos los logs
-        customProps: (req: IncomingMessage) => {
-          return {
-            correlation_id: req[correlation_id_header],
-          };
+        // Añadir un id unico a cada request para la trazabilidad
+        genReqId: () => {
+          return randomUUID();
         },
+        // Para identificar ese id como correlation id
+        customAttributeKeys: { reqId: 'correlation_id' },
+        // Para un formato corto que incluya solo el id generado
+        quietReqLogger: true,
         autoLogging: false, // eliminar logs automaticos, solo ver los que se declaran
+
         serializers: {
-          // No devuelva la info de req y res en los log
+          // No devuelva la toda la info de req y res en los log
           req: () => undefined,
           res: () => undefined,
+        },
+
+        // Para formato de tiempo timestamps en formato mas amigable
+        timestamp: () => {
+          const now = new Date();
+          const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+          return `,"time":"${formattedDate}"`;
         },
       },
     }),
